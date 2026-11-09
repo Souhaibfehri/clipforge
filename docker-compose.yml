@@ -5,11 +5,13 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - "8000:8000"
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8000}:8000"
+    # Shares the server with other apps (e.g. a trading bot): never take the whole machine.
+    cpus: "${APP_CPUS:-0.75}"
+    mem_limit: "${APP_MEM:-2g}"
     restart: unless-stopped
 
-  # HTTPS with your own domain (needed for recording your voice from the phone).
-  # Start it with:  docker compose --profile https up -d
+  # HTTPS with your own domain (needed to record your voice from the phone).
   caddy:
     image: caddy:2
     profiles: ["https"]

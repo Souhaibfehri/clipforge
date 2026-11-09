@@ -289,7 +289,7 @@ def _rerender(clip, **changes):
     job = db.get_job(clip["job_id"])
     src = pipeline.find_source(clip["job_id"])
     if src is None:
-        _bad("Source video is gone, can't re-render", 409)
+        _bad("The source video was cleaned up to save disk space (SOURCE_RETENTION_DAYS). Run the link again to re-edit.", 409)
     settings, _, _ = pipeline.channel_settings(job)
     clip = dict(clip, **changes)
     try:

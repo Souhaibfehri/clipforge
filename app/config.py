@@ -38,6 +38,9 @@ UPLOADPOST_API_KEY = os.getenv("UPLOADPOST_API_KEY", "")
 WATCH_EVERY_HOURS = float(os.getenv("WATCH_EVERY_HOURS", "3"))
 STATS_EVERY_MINUTES = float(os.getenv("STATS_EVERY_MINUTES", "60"))
 
+# Disk: delete downloaded source videos of finished jobs after N days (clips are kept). 0 = never.
+SOURCE_RETENTION_DAYS = float(os.getenv("SOURCE_RETENTION_DAYS", "3"))
+
 # Security
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")
 APP_USER = os.getenv("APP_USER", "admin")
