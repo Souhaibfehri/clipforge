@@ -1,0 +1,11 @@
+{$DOMAIN} {
+	request_body {
+		max_size 4GB
+	}
+	reverse_proxy app:8000 {
+		transport http {
+			read_timeout 30m
+			write_timeout 30m
+		}
+	}
+}

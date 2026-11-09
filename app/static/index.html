@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0e11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ClipForge</title>
+<style>
+:root{
+  --bg:#0d0e11; --panel:#16181d; --panel2:#1e2128; --line:#2a2e37; --text:#eceef2; --muted:#8f96a3; --faint:#5d6370;
+  --accent:#ffd23f; --ink:#1a1500; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --rec:#ef4444; --bar:#ffd23f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+header{position:sticky;top:0;z-index:20;background:rgba(13,14,17,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  padding:10px 16px;display:flex;align-items:center;gap:14px}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:18px;text-decoration:none}
+.logo span{color:var(--accent)}
+nav.top{display:flex;gap:4px}
+nav a{text-decoration:none;color:var(--muted);padding:7px 11px;border-radius:9px;font-weight:600;font-size:14px}
+nav a.on{color:var(--text);background:var(--panel2)}
+header .sp{flex:1}
+.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 9px;white-space:nowrap}
+nav.bottom{display:none}
+main{max-width:1100px;margin:0 auto;padding:16px 16px 90px}
+@media (max-width:720px){
+  nav.top{display:none}
+  nav.bottom{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:20;background:rgba(13,14,17,.96);border-top:1px solid var(--line);
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-around}
+  nav.bottom a{display:flex;flex-direction:column;align-items:center;font-size:11px;padding:6px 10px;gap:2px}
+  nav.bottom a b{font-size:18px;line-height:1}
+}
+h1{font-size:22px;margin:4px 0 14px;letter-spacing:-.01em}
+h2{font-size:16px;margin:0 0 12px}
+h3{font-size:14px;margin:0 0 10px;color:var(--muted);font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+input[type=text],input[type=number],input[type=url],input[type=datetime-local],textarea,select{width:100%;background:var(--panel2);color:var(--text);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}
+textarea{resize:vertical;min-height:70px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:130px}
+.check{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;color:var(--text)}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+button,.btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:9px 14px;
+  font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;justify-content:center;font-size:14px}
+button.primary,.btn.primary{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+button.rec{background:var(--rec);border-color:var(--rec);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.small{font-size:13px;padding:6px 10px}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.err{color:var(--bad);white-space:pre-wrap;font-size:13px}
+.ok{color:var(--good)}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--accent);animation:pulse 1.2s infinite}
+.dot.done,.dot.posted{background:var(--good)} .dot.error,.dot.failed{background:var(--bad)} .dot.queued,.dot.posting{background:var(--warn)}
+@keyframes pulse{50%{opacity:.3}}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--muted)}
+.swatch{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.list{display:grid;gap:8px}
+.item{display:flex;gap:12px;align-items:center;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+.item img,.item .ph{width:44px;height:78px;object-fit:cover;border-radius:6px;background:var(--panel2);flex:none}
+.item .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.item .r{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chan{display:block;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;border-top:3px solid var(--c,var(--accent))}
+.chan .n{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+.chan .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.chan .stats b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.chan .stats span{font-size:11px;color:var(--muted)}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin:4px 0 14px;border-bottom:1px solid var(--line)}
+.tabs a{padding:9px 12px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs a.on{color:var(--text);border-color:var(--accent)}
+.clip video{width:100%;aspect-ratio:9/16;background:#000;border-radius:10px;display:block;max-height:70vh}
+.clip .meta{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;gap:8px;flex-wrap:wrap}
+.score{font-weight:800;color:var(--accent)}
+.field{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px;position:relative}
+.field>b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.field .copy{position:absolute;top:6px;right:6px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.seg{display:flex;gap:6px;margin-top:10px}
+.seg button{flex:1}
+.seg button.on{border-color:var(--accent);color:var(--accent)}
+.prompter{background:#000;border-radius:10px;padding:14px;font-size:20px;line-height:1.5;margin-top:8px}
+.timer{font-variant-numeric:tabular-nums;font-weight:700}
+details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 14px;border-radius:99px;
+  font-weight:600;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:30;max-width:90vw}
+.toast.on{opacity:1}
+.progress{height:4px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.posts{margin-top:8px;display:grid;gap:6px}
+.post{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
+.post .r{margin-left:auto;font-variant-numeric:tabular-nums}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .tip{position:absolute;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;font-weight:600;padding:4px 8px;border-radius:7px;
+  transform:translate(-50%,-110%);white-space:nowrap;opacity:0;transition:opacity .1s}
+.hbars{display:grid;gap:7px}
+.hbar{display:grid;grid-template-columns:110px 1fr 70px;align-items:center;gap:10px;font-size:13px}
+.hbar .track{height:10px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.hbar .fill{height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+.hbar .num{text-align:right;font-variant-numeric:tabular-nums}
+.insight ul{margin:6px 0 0;padding-left:18px}
+.insight li{margin:3px 0}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th,table.tbl td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+table.tbl td.n{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#/">Clip<span>Forge</span></a>
+  <nav class="top" id="navtop"></nav>
+  <div class="sp"></div>
+  <span class="pill" id="sys">…</span>
+</header>
+<main id="view"></main>
+<nav class="bottom" id="navbot"></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================ helpers */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtT = s => { s = Math.round(s||0); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return h?`${h}:${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`:`${m}:${String(s%60).padStart(2,"0")}` };
+const num = n => { n = +n||0; return n>=1e6 ? (n/1e6).toFixed(n>=1e7?0:1)+"M" : n>=1e4 ? Math.round(n/1e3)+"k" : n>=1e3 ? (n/1e3).toFixed(1)+"k" : String(Math.round(n)) };
+const money = n => "$" + (+n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const when = ts => ts ? new Date(ts*1000).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+const RUNNING = ["queued","downloading","transcribing","analysing","selecting","rendering"];
+const PLAT = {tiktok:"TikTok",instagram:"Reels",youtube:"Shorts",facebook:"Facebook",x:"X",other:"Link"};
+let cfg = {}, pollTimer = null;
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2200) }
+async function api(path, opts={}){
+  if(opts.json !== undefined){ opts.body = JSON.stringify(opts.json); opts.headers = {"Content-Type":"application/json"}; delete opts.json }
+  const r = await fetch(path, opts);
+  if(!r.ok){ let d; try{ d=(await r.json()).detail }catch{ d=await r.text() } throw new Error(typeof d==="string"?d:JSON.stringify(d)) }
+  return r.json();
+}
+function copy(text){ navigator.clipboard.writeText(text).then(()=>toast("Copied")) }
+function poll(fn, ms){ clearTimeout(pollTimer); pollTimer = setTimeout(fn, ms) }
+const media = (job, path, bust="") => path ? `/media/${job}/${path}${bust}` : "";
+
+/* ============================================================ charts */
+// Single-series vertical bars: views gained per day. One accent hue, rounded data-end, hover tooltip.
+function barChart(points, {valueLabel="views"}={}){
+  if(!points.length) return `<div class="empty">No data yet</div>`;
+  const W=640, H=240, pad={l:54,r:6,t:12,b:34}, n=points.length;
+  const max = Math.max(1, ...points.map(p=>p.v));
+  const step = (W-pad.l-pad.r)/n, bw = Math.max(2, Math.min(18, step-2));
+  const y = v => pad.t + (H-pad.t-pad.b)*(1-v/max);
+  const ticks = [0, max/2, max];
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(valueLabel)} per day">`;
+  ticks.forEach(t => s += `<line x1="${pad.l}" x2="${W-pad.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/>`
+    + `<text x="${pad.l-6}" y="${y(t)+4}" fill="var(--muted)" font-size="20" text-anchor="end">${num(t)}</text>`);
+  points.forEach((p,i) => {
+    const x = pad.l + i*step + (step-bw)/2, top = y(p.v), h = (H-pad.b)-top;
+    if(h > 0.5){
+      const r = Math.min(4, bw/2, h);
+      s += `<path d="M${x},${H-pad.b} V${top+r} Q${x},${top} ${x+r},${top} H${x+bw-r} Q${x+bw},${top} ${x+bw},${top+r} V${H-pad.b} Z" fill="var(--bar)"/>`;
+    }
+    s += `<rect class="hit" x="${pad.l+i*step}" y="${pad.t}" width="${step}" height="${H-pad.t-pad.b}" fill="transparent" data-i="${i}"/>`;
+    if(i===0 || i===n-1 || (n>10 && i===Math.floor(n/2))) s += `<text x="${i===0?x:i===n-1?x+bw:x+bw/2}" y="${H-6}" fill="var(--muted)" font-size="20" text-anchor="${i===0?"start":i===n-1?"end":"middle"}">${esc(p.label)}</text>`;
+  });
+  s += `</svg>`;
+  const id = "c"+Math.random().toString(36).slice(2,8);
+  setTimeout(() => {
+    const box = document.getElementById(id); if(!box) return;
+    const tip = $(".tip", box), svg = $("svg", box);
+    $$(".hit", box).forEach(r => {
+      const show = () => { const p = points[+r.dataset.i], bb = r.getBoundingClientRect(), cb = box.getBoundingClientRect();
+        tip.textContent = `${p.label}: ${(+p.v).toLocaleString()} ${valueLabel}`; tip.style.left = (bb.left-cb.left+bb.width/2)+"px";
+        tip.style.top = (svg.getBoundingClientRect().height*(y(p.v)/H))+"px"; tip.style.opacity = 1 };
+      r.addEventListener("mouseenter", show); r.addEventListener("touchstart", show, {passive:true});
+      r.addEventListener("mouseleave", () => tip.style.opacity = 0);
+    });
+  });
+  return `<div class="chart" id="${id}">${s}<div class="tip"></div></div>`;
+}
+const dailyPoints = daily => daily.map(d => ({label: new Date(d.day+"T12:00").toLocaleDateString(undefined,{month:"short",day:"numeric"}), v: d.views}));
+// Horizontal bars for "average views per post" by bucket; value printed in text ink.
+function hBars(rows){
+  if(!rows || !rows.length) return `<div class="faint" style="font-size:13px">No posted clips yet</div>`;
+  const max = Math.max(1, ...rows.map(r=>r.avg_views));
+  return `<div class="hbars">${rows.map(r=>`
+    <div class="hbar" title="${esc(r.key)}: ${r.avg_views.toLocaleString()} avg views over ${r.posts} posts">
+      <span>${esc(r.key)}</span><div class="track"><div class="fill" style="width:${Math.max(2,r.avg_views/max*100)}%"></div></div>
+      <span class="num">${num(r.avg_views)} <span class="faint">·${r.posts}</span></span></div>`).join("")}</div>`;
+}
+
+/* ============================================================ nav */
+const NAV = [["#/","Dashboard","◧"],["#/new","New","＋"],["#/channels","Channels","☰"],["#/queue","Posts","↗"]];
+function renderNav(){
+  const h = location.hash || "#/";
+  const on = href => href==="#/" ? (h==="#/"||h==="") : h.startsWith(href) || (href==="#/channels" && h.startsWith("#/channel/"));
+  $("#navtop").innerHTML = NAV.map(([href,l]) => `<a href="${href}" class="${on(href)?"on":""}">${l}</a>`).join("");
+  $("#navbot").innerHTML = NAV.map(([href,l,i]) => `<a href="${href}" class="${on(href)?"on":""}"><b>${i}</b>${l}</a>`).join("");
+}
+
+/* ============================================================ dashboard */
+async function pageDashboard(){
+  const v = $("#view");
+  const d = await api("/api/overview");
+  const t = d.totals;
+  v.innerHTML = `
+    <h1>Dashboard</h1>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${num(t.views)}</div><div class="l">Total views</div></div>
+      <div class="kpi"><div class="v">${num(t.views_7d)}</div><div class="l">Views, last 7 days</div></div>
+      <div class="kpi"><div class="v">${money(t.earnings)}</div><div class="l">Est. earnings</div></div>
+      <div class="kpi"><div class="v">${t.posts}</div><div class="l">Posts live</div></div>
+      <div class="kpi"><div class="v">${t.clips_ready}</div><div class="l">Clips made</div></div>
+      <div class="kpi"><div class="v">${t.queued}</div><div class="l">Scheduled</div></div>
+    </div>
+    <div class="card"><h2>Views gained per day</h2>${barChart(dailyPoints(d.daily))}</div>
+    <div class="row" style="align-items:center;margin:20px 0 10px"><h2 style="margin:0">Channels</h2>
+      <a class="btn small" href="#/channels" style="flex:none;min-width:0">Manage</a></div>
+    ${d.channels.length ? `<div class="grid g2">${d.channels.map(chanCard).join("")}</div>`
+      : `<div class="card empty">No channels yet. <a href="#/channels">Create your first channel</a> (anime, sports, comedy, movies, money…)</div>`}
+    <h2 style="margin:22px 0 10px">Top clips</h2>
+    ${d.top.length ? `<div class="list">${d.top.map(topItem).join("")}</div>` : `<div class="card empty">Post clips and add their links to see what performs.</div>`}`;
+}
+function chanCard(c){
+  return `<a class="chan" href="#/channel/${c.id}" style="--c:${esc(c.color)}">
+    <div class="n"><span class="swatch" style="background:${esc(c.color)}"></span>${esc(c.name)}</div>
+    <div class="status" style="margin-top:4px">${esc(c.label)}${c.auto_post?" · auto-post":""}${c.watch?" · watching":""}</div>
+    <div class="stats">
+      <div><b>${num(c.views)}</b><span>views</span></div>
+      <div><b>${num(c.avg_views)}</b><span>avg / post</span></div>
+      <div><b>${c.cpm?money(c.earnings):c.posts}</b><span>${c.cpm?"earned":"posts"}</span></div>
+    </div></a>`;
+}
+function topItem(c){
+  return `<a class="item" href="#/job/${c.job_id}">
+    ${c.thumb?`<img src="${media(c.job_id,c.thumb)}" loading="lazy">`:`<div class="ph"></div>`}
+    <div style="min-width:0"><div class="t">${esc(c.hook||c.title)}</div><div class="status">${esc((c.platforms||"").split(",").map(p=>PLAT[p]||p).join(" · "))}</div></div>
+    <div class="r"><b>${num(c.views)}</b><div class="status">views</div></div></a>`;
+}
+
+/* ============================================================ new job */
+async function pageNew(){
+  const v = $("#view");
+  const chans = await api("/api/channels");
+  if(!chans.length){ v.innerHTML = `<h1>New clips</h1><div class="card empty">Create a channel first: <a href="#/channels">Channels</a></div>`; return }
+  const pre = new URLSearchParams(location.hash.split("?")[1]||"").get("channel");
+  v.innerHTML = `
+  <h1>New clips</h1>
+  <div class="card"><form id="f">
+    <label>Channel</label>
+    <select name="channel_id">${chans.map(c=>`<option value="${c.id}" ${String(c.id)===pre?"selected":""}>${esc(c.name)} (${esc(cfg.presets[c.niche]?.label||c.niche)})</option>`).join("")}</select>
+    <label>Video links: one per line, batch as many as you want</label>
+    <textarea name="urls" rows="4" placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
+    <label>or upload a video</label>
+    <input type="file" name="file" accept="video/*">
+    <div class="row">
+      <div><label>Clips per video (empty = channel default)</label><input type="number" name="num_clips" min="1" max="20" placeholder="default"></div>
+      <div><label>Commentary language</label><select name="commentary_language"><option value="">Channel default</option><option>English</option><option>French (Québec)</option><option>French</option><option>Arabic</option></select></div>
+    </div>
+    <label>Angle for this batch (optional)</label>
+    <input type="text" name="angle" placeholder="leave empty to use the channel's angle">
+    <details><summary>Advanced</summary><label>Spoken language (empty = auto)</label><input type="text" name="language" placeholder="en, fr, ja…"></details>
+    <div class="progress" id="up" hidden><i></i></div>
+    <div style="margin-top:14px"><button class="primary" style="width:100%">Start clipping</button></div>
+    <div class="err" id="ferr"></div>
+  </form></div>`;
+  $("#f").onsubmit = e => {
+    e.preventDefault();
+    const fd = new FormData(e.target), btn = $("button.primary", e.target);
+    if(!fd.get("urls").trim() && !fd.get("file").size){ $("#ferr").textContent="Paste a link or choose a file"; return }
+    if(!fd.get("file").size) fd.delete("file");
+    if(!fd.get("num_clips")) fd.delete("num_clips");
+    btn.disabled = true; $("#ferr").textContent = "";
+    const xhr = new XMLHttpRequest(), bar = $("#up");
+    xhr.open("POST","/api/jobs");
+    xhr.upload.onprogress = ev => { if(ev.lengthComputable){ bar.hidden=false; $("i",bar).style.width=(ev.loaded/ev.total*100)+"%" } };
+    xhr.onload = () => {
+      btn.disabled=false; bar.hidden=true;
+      if(xhr.status<300){ const r=JSON.parse(xhr.responseText); toast(`${r.jobs.length} job(s) queued`);
+        location.hash = r.jobs.length===1 ? "#/job/"+r.jobs[0].id : "#/channel/"+fd.get("channel_id")+"?tab=jobs" }
+      else { let m; try{ m=JSON.parse(xhr.responseText).detail }catch{ m=xhr.responseText } $("#ferr").textContent = m }
+    };
+    xhr.onerror = () => { btn.disabled=false; $("#ferr").textContent="Network error" };
+    xhr.send(fd);
+  };
+}
+
+/* ============================================================ channels */
+async function pageChannels(){
+  const v = $("#view");
+  const chans = await api("/api/channels");
+  const opts = Object.entries(cfg.presets).map(([k,p])=>`<option value="${k}">${esc(p.label)}</option>`).join("");
+  v.innerHTML = `
+  <h1>Channels</h1>
+  <div class="card"><h2>New channel</h2>
+    <form id="nc" class="row" style="align-items:flex-end">
+      <div><label>Name</label><input type="text" name="name" placeholder="e.g. Anime Peaks" required></div>
+      <div><label>Niche (sets editing style)</label><select name="niche">${opts}</select></div>
+      <div style="flex:none"><button class="primary">Create</button></div>
+    </form>
+    <div class="faint" style="font-size:12px;margin-top:8px">Each channel = one set of social accounts + its own style, sources, posting times and stats.</div>
+  </div>
+  ${chans.length ? `<div class="grid g2">${chans.map(c=>chanCard({...c.summary})).join("")}</div>` : ""}`;
+  $("#nc").onsubmit = async e => {
+    e.preventDefault(); const fd = new FormData(e.target);
+    try{ const ch = await api("/api/channels",{method:"POST",json:{name:fd.get("name"),niche:fd.get("niche")}}); location.hash = "#/channel/"+ch.id+"?tab=settings" }
+    catch(err){ toast(err.message) }
+  };
+}
+
+async function pageChannel(id, tab){
+  const v = $("#view");
+  const d = await api("/api/channels/"+id);
+  const ch = d.channel, st = d.stats, s = st.summary, set = ch.settings;
+  tab = tab || "overview";
+  const TABS = [["overview","Overview"],["clips","Clips"],["jobs","Jobs"],["stats","What works"],["settings","Settings"]];
+  v.innerHTML = `
+  <div class="row" style="align-items:center;margin-bottom:6px">
+    <h1 style="margin:0;display:flex;align-items:center;gap:10px"><span class="swatch" style="background:${esc(set.color)};width:14px;height:14px"></span>${esc(ch.name)}</h1>
+    <a class="btn primary small" href="#/new?channel=${ch.id}" style="flex:none;min-width:0">＋ New clips</a>
+  </div>
+  <div class="status" style="margin-bottom:10px">${esc(cfg.presets[ch.niche]?.label||ch.niche)}${set.uploadpost_user?" · accounts: "+esc(set.uploadpost_user):""}</div>
+  <div class="tabs">${TABS.map(([k,l])=>`<a href="#/channel/${id}?tab=${k}" class="${k===tab?"on":""}">${l}</a>`).join("")}</div>
+  <div id="tab"></div>`;
+  const T = $("#tab");
+  if(tab==="overview"){
+    T.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="v">${num(s.views)}</div><div class="l">Views</div></div>
+      <div class="kpi"><div class="v">${num(s.avg_views)}</div><div class="l">Avg per post</div></div>
+      <div class="kpi"><div class="v">${s.posts}</div><div class="l">Posts (${s.posts_7d} this week)</div></div>
+      <div class="kpi"><div class="v">${money(s.earnings)}</div><div class="l">Est. earnings${s.cpm?` @ $${s.cpm}/1k`:" (set CPM)"}</div></div>
+      <div class="kpi"><div class="v">${s.clips_ready}</div><div class="l">Clips made</div></div>
+      <div class="kpi"><div class="v">${s.queued}</div><div class="l">Scheduled</div></div>
+    </div>
+    ${s.budget?`<div class="card"><h3>Campaign budget</h3><div class="progress" style="height:8px"><i style="width:${Math.min(100,s.earnings/s.budget*100)}%"></i></div>
+      <div class="status" style="margin-top:6px">${money(s.earnings)} of ${money(s.budget)} (${Math.round(s.earnings/s.budget*100)}%)</div></div>`:""}
+    <div class="card"><h2>Views gained per day</h2>${barChart(dailyPoints(st.daily))}</div>
+    <h2 style="margin:18px 0 10px">Top clips</h2>
+    ${st.top.length?`<div class="list">${st.top.map(topItem).join("")}</div>`:`<div class="card empty">No tracked posts yet.</div>`}`;
+  }
+  if(tab==="clips"){
+    const jobs = d.jobs.filter(j=>j.status==="done");
+    const all = (await Promise.all(jobs.slice(0,20).map(j=>api("/api/jobs/"+j.id)))).flatMap(j=>j.clips.filter(c=>c.status==="ready"));
+    T.innerHTML = all.length ? `<div class="list">${all.map(c=>{
+      const views = (c.posts||[]).reduce((a,p)=>a+(p.views||0),0), posted=(c.posts||[]).filter(p=>p.status==="posted").length, q=(c.posts||[]).filter(p=>p.status==="queued").length;
+      return `<a class="item" href="#/job/${c.job_id}#${c.id}"><img src="${media(c.job_id,c.thumb)}" loading="lazy">
+        <div style="min-width:0"><div class="t">${esc(c.hook||c.title)}</div>
+        <div class="status">${c.final?"🎙 voiceover · ":""}${posted?posted+" posted":q?q+" scheduled":"not posted"} · score ${c.score}</div></div>
+        <div class="r"><b>${num(views)}</b><div class="status">views</div></div></a>`}).join("")}</div>`
+      : `<div class="card empty">No clips yet. <a href="#/new?channel=${id}">Make some</a></div>`;
+  }
+  if(tab==="jobs"){
+    const render = async () => {
+      const jobs = await api("/api/jobs?channel_id="+id);
+      T.innerHTML = jobs.length ? `<div class="list">${jobs.map(jobItem).join("")}</div>` : `<div class="card empty">No jobs yet.</div>`;
+      if(jobs.some(j=>RUNNING.includes(j.status))) poll(render, 4000);
+    };
+    render();
+  }
+  if(tab==="stats"){
+    const ins = st.insight?.data;
+    T.innerHTML = `
+    <div class="card insight"><div class="row" style="align-items:center"><h2 style="margin:0">Claude's read on this channel</h2>
+      <button class="small primary" id="gen" style="flex:none;min-width:0">${ins?"Refresh insights":"Generate insights"}</button></div>
+      <div id="ins" style="margin-top:10px">${ins ? insightHtml(ins, st.insight.created) : `<div class="faint" style="font-size:13px">Needs at least 5 posted clips with views. The winning hooks it finds are fed back into future clip picks.</div>`}</div></div>
+    <div class="grid g2">
+      <div class="card"><h3>Avg views by clip length</h3>${hBars(st.by_length)}</div>
+      <div class="card"><h3>Avg views by posting hour</h3>${hBars(st.by_hour)}</div>
+      <div class="card"><h3>Avg views by platform</h3>${hBars(st.by_platform.map(r=>({...r,key:PLAT[r.key]||r.key})))}</div>
+      <div class="card"><h3>Voiceover vs none</h3>${hBars(st.by_voiceover)}</div>
+      <div class="card"><h3>Avg views by caption style</h3>${hBars(st.by_style)}</div>
+    </div>`;
+    $("#gen").onclick = async () => { $("#gen").disabled = true; $("#ins").innerHTML = `<span class="status"><span class="dot run"></span>Claude is reading your numbers…</span>`;
+      try{ const r = await api(`/api/channels/${id}/insights`,{method:"POST"}); $("#ins").innerHTML = insightHtml(r, Date.now()/1000) }
+      catch(e){ $("#ins").innerHTML = `<div class="err">${esc(e.message)}</div>` } $("#gen").disabled = false };
+  }
+  if(tab==="settings") channelSettings(T, ch);
+}
+function insightHtml(i, ts){
+  const ul = a => (a&&a.length) ? `<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>` : "";
+  return `<p style="margin:0 0 8px">${esc(i.summary)}</p>
+    ${i.working?.length?`<h3 style="margin-top:12px">Working</h3>${ul(i.working)}`:""}
+    ${i.not_working?.length?`<h3 style="margin-top:12px">Not working</h3>${ul(i.not_working)}`:""}
+    ${i.next_actions?.length?`<h3 style="margin-top:12px">Do next</h3>${ul(i.next_actions)}`:""}
+    ${i.best_hours?.length?`<div class="status" style="margin-top:10px">Best hours: ${esc(i.best_hours.join(", "))}</div>`:""}
+    <div class="faint" style="font-size:12px;margin-top:8px">Based on ${i.based_on||"?"} posts · ${when(ts)}</div>`;
+}
+function jobItem(j){
+  return `<a class="item" href="#/job/${j.id}">
+    ${j.thumb?`<img src="${media(j.id,j.thumb)}" loading="lazy">`:`<div class="ph"></div>`}
+    <div style="min-width:0"><div class="t">${esc(j.title)}</div>
+    <div class="status"><span class="dot ${RUNNING.includes(j.status)?"run":j.status}"></span>${esc(j.message)}${j.duration?` · ${fmtT(j.duration)}`:""}</div></div>
+    <div class="r"><b>${j.ready}</b><div class="status">clips</div></div></a>`;
+}
+
+function channelSettings(T, ch){
+  const s = ch.settings, P = cfg.presets;
+  const sel = (name, opts, val) => `<select name="${name}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${String(v)===String(val)?"selected":""}>${esc(l)}</option>`}).join("")}</select>`;
+  const chk = (name, label, val) => `<label class="check"><input type="checkbox" name="${name}" ${val?"checked":""}> ${label}</label>`;
+  T.innerHTML = `
+  <form id="cs">
+  <div class="card"><h2>Identity</h2>
+    <div class="row"><div><label>Name</label><input type="text" name="name" value="${esc(ch.name)}"></div>
+    <div><label>Niche</label>${sel("niche", Object.entries(P).map(([k,p])=>[k,p.label]), ch.niche)}</div>
+    <div style="flex:0 0 90px;min-width:0"><label>Color</label><input type="color" name="color" value="${esc(s.color)}" style="width:100%;height:42px;background:none;border:0"></div></div>
+    <label>Channel angle: what Claude looks for and how your commentary sounds</label>
+    <textarea name="angle" rows="2" placeholder="e.g. hype anime fight breakdowns, explain power systems">${esc(s.angle)}</textarea>
+    <div class="row"><div><label>Commentary language</label>${sel("commentary_language",[["","Same as video"],"English","French (Québec)","French","Arabic","Spanish"],s.commentary_language)}</div>
+    <div><label>Clips per video</label><input type="number" name="num_clips" min="1" max="20" value="${s.num_clips}"></div></div>
+  </div>
+  <div class="card"><h2>Editing</h2>
+    <div class="row">
+      <div><label>Layout</label>${sel("layout",[["auto","Auto (face / split / fit)"],["face","Face tracking"],["split","Split screen (2 people)"],["fit","Fit + blur (movies, anime, sports)"]],s.layout)}</div>
+      <div><label>Captions</label>${sel("caption_style",[["bold","Bold yellow highlight"],["karaoke","Big green karaoke"],["boxed","White box"],["minimal","Minimal"],["none","No captions"]],s.caption_style)}</div>
+    </div>
+    <div class="row"><div><label>Min length (s)</label><input type="number" name="min_s" value="${s.min_s}"></div>
+    <div><label>Max length (s)</label><input type="number" name="max_s" value="${s.max_s}"></div></div>
+    ${chk("remove_silences","Jump-cut pauses and filler words (um, uh)",s.remove_silences)}
+    ${chk("punch_zoom","Zoom punch-ins on sentence changes",s.punch_zoom)}
+    ${chk("cold_open","Cold open: flash the best line first",s.cold_open)}
+    ${chk("progress_bar","Progress bar",s.progress_bar)}
+    <label>Call to action shown in the last 3 seconds</label><input type="text" name="cta" value="${esc(s.cta)}" placeholder="Follow for part 2">
+  </div>
+  <div class="card"><h2>Posting</h2>
+    <div id="acct" class="status">${cfg.posting_ready?"Checking connected accounts…":"Auto-posting needs UPLOADPOST_API_KEY in .env. Without it, post manually and paste links to track views."}</div>
+    ${cfg.posting_ready?`<div class="actions"><button type="button" class="small" id="connect">Connect TikTok / Instagram / YouTube</button></div>`:""}
+    <label>Platforms</label>
+    <div class="row">${["tiktok","instagram","youtube","facebook"].map(p=>`<label class="check" style="flex:none;min-width:0"><input type="checkbox" name="pf_${p}" ${(s.platforms||[]).includes(p)?"checked":""}> ${PLAT[p]}</label>`).join("")}</div>
+    ${chk("auto_post","Auto-schedule new clips into the time slots",s.auto_post)}
+    ${chk("require_voiceover","…only once I've added my voiceover",s.require_voiceover)}
+    <div class="row"><div><label>Daily time slots</label><input type="text" name="slots" value="${esc((s.slots||[]).join(", "))}" placeholder="11:30, 17:30, 20:30"></div>
+    <div><label>Time zone</label><input type="text" name="timezone" value="${esc(s.timezone)}"></div></div>
+    <label>Hashtags always added</label><input type="text" name="hashtags" value="${esc(s.hashtags)}">
+  </div>
+  <div class="card"><h2>Money</h2>
+    <div class="row"><div><label>Pay rate ($ per 1,000 views)</label><input type="number" step="0.01" name="cpm" value="${s.cpm}"></div>
+    <div><label>Campaign budget cap ($, 0 = none)</label><input type="number" step="1" name="budget" value="${s.budget}"></div></div>
+  </div>
+  <div class="card"><h2>Sources to watch</h2>
+    <label>YouTube channels or playlists (one per line). New uploads get clipped automatically.</label>
+    <textarea name="sources" rows="3" placeholder="https://www.youtube.com/@creator">${esc((s.sources||[]).join("\n"))}</textarea>
+    ${chk("watch","Watch these sources",s.watch)}
+    <div class="row"><div><label>On first check, also clip the latest N videos</label><input type="number" name="backfill" min="0" max="6" value="${s.backfill ?? 1}"></div></div>
+    <div class="actions"><button type="button" class="small" id="watchnow">Check sources now</button></div>
+  </div>
+  <div class="actions" style="justify-content:space-between">
+    <button class="primary">Save settings</button>
+    <button type="button" class="small" id="delch" style="color:var(--bad)">Delete channel</button>
+  </div>
+  <div class="err" id="serr"></div>
+  </form>`;
+  const f = $("#cs");
+  f.onsubmit = async e => {
+    e.preventDefault(); const fd = new FormData(f);
+    const settings = {};
+    ["angle","commentary_language","layout","caption_style","cta","slots","timezone","hashtags","sources","color"].forEach(k=>settings[k]=fd.get(k));
+    ["num_clips","min_s","max_s","backfill"].forEach(k=>settings[k]=+fd.get(k));
+    ["cpm","budget"].forEach(k=>settings[k]=parseFloat(fd.get(k))||0);
+    ["remove_silences","punch_zoom","cold_open","progress_bar","auto_post","require_voiceover","watch"].forEach(k=>settings[k]=!!fd.get(k));
+    settings.platforms = ["tiktok","instagram","youtube","facebook"].filter(p=>fd.get("pf_"+p));
+    try{ await api("/api/channels/"+ch.id,{method:"PUT",json:{name:fd.get("name"),niche:fd.get("niche"),settings}}); toast("Saved") }
+    catch(err){ $("#serr").textContent = err.message }
+  };
+  $("#watchnow").onclick = async () => { toast("Checking sources…");
+    try{ const r = await api(`/api/channels/${ch.id}/watch-now`,{method:"POST"}); toast(r.created.length?`${r.created.length} new video(s) queued`:"No new videos") }catch(e){ toast(e.message) } };
+  $("#delch").onclick = async () => { if(confirm(`Delete channel "${ch.name}"? Clips are kept.`)){ await api("/api/channels/"+ch.id,{method:"DELETE"}); location.hash="#/channels" } };
+  if(cfg.posting_ready){
+    api(`/api/channels/${ch.id}/accounts`).then(r => {
+      const a = Object.entries(r.accounts||{});
+      $("#acct").innerHTML = a.length ? "Connected: " + a.map(([p,u])=>`<span class="chip">${esc(PLAT[p]||p)} · ${esc(u)}</span>`).join(" ") : (r.error?`<span class="err">${esc(r.error)}</span>`:"No accounts connected yet.");
+    });
+    $("#connect").onclick = async () => { try{ const r = await api(`/api/channels/${ch.id}/connect`,{method:"POST"}); window.open(r.url,"_blank") }catch(e){ toast(e.message) } };
+  }
+}
+
+/* ============================================================ job */
+let lastJobJson = "";
+async function pageJob(id){
+  lastJobJson = "";
+  const load = async () => {
+    let job; try{ job = await api("/api/jobs/"+id) }catch(e){ $("#view").innerHTML = `<div class="err">${esc(e.message)}</div>`; return }
+    const json = JSON.stringify(job);
+    if(json !== lastJobJson && !document.querySelector(".recording")){ renderJob(job); lastJobJson = json }
+    if(RUNNING.includes(job.status) || job.clips.some(c=>c.status==="rendering" || (c.posts||[]).some(p=>p.status==="posting"))) poll(load, 3500);
+  };
+  await load();
+  const anchor = location.hash.split("#")[2]; if(anchor){ const el = document.getElementById("c-"+anchor); el && el.scrollIntoView({behavior:"smooth"}) }
+}
+function renderJob(job){
+  const running = RUNNING.includes(job.status);
+  $("#view").innerHTML = `
+  <div class="card">
+    <div class="row" style="align-items:flex-start">
+      <div style="flex:1;min-width:0"><h2 style="margin-bottom:6px">${esc(job.title)}</h2>
+        <div class="status"><span class="dot ${running?"run":job.status}"></span>${esc(job.message)}${job.duration?` · source ${fmtT(job.duration)}`:""}${job.channel?` · <a href="#/channel/${job.channel.id}">${esc(job.channel.name)}</a>`:""}</div></div>
+      ${job.channel?`<a class="btn small" href="#/channel/${job.channel.id}?tab=jobs" style="flex:none;min-width:0">← Channel</a>`:""}
+    </div>
+    ${job.error?`<div class="err" style="margin-top:10px">${esc(job.error)}</div>`:""}
+    <div class="actions">${job.status==="error"?`<button class="small" id="retry">Retry</button>`:""}${!running?`<button class="small" id="del">Delete job</button>`:""}</div>
+  </div>
+  <div class="grid g3">${job.clips.map(c=>clipCard(job,c)).join("")}</div>`;
+  $("#retry") && ($("#retry").onclick = async () => { await api(`/api/jobs/${job.id}/retry`,{method:"POST"}); pageJob(job.id) });
+  $("#del") && ($("#del").onclick = async () => { if(confirm("Delete this job, its clips and their stats?")){ await api(`/api/jobs/${job.id}`,{method:"DELETE"}); location.hash = job.channel?"#/channel/"+job.channel.id+"?tab=jobs":"#/" } });
+  job.clips.forEach(c => wireClip(job, c));
+}
+function clipCard(job, c){
+  const bust = "?v=" + encodeURIComponent((c.final||"")+(c.hook||"")+(c.out_duration||"")+(c.caption_style||""));
+  const src = c.final || c.file;
+  const vid = c.status==="ready"
+    ? `<video id="v-${c.id}" src="${media(job.id,src,bust)}" controls playsinline preload="metadata" poster="${media(job.id,c.thumb,bust)}"></video>`
+    : `<div class="field" style="aspect-ratio:9/16;display:grid;place-items:center">${c.status==="error"?`<span class="err">${esc(c.error||"Render failed")}</span>`:`<span class="status"><span class="dot run"></span>${esc(c.status)}</span>`}</div>`;
+  const post = `${c.title}\n\n${c.description}\n\n${(c.hashtags||[]).join(" ")}`;
+  const posts = c.posts||[];
+  const views = posts.reduce((a,p)=>a+(p.views||0),0);
+  return `
+  <div class="card clip" id="c-${c.id}">
+    ${vid}
+    <div class="meta"><span class="status">${fmtT(c.start)}→${fmtT(c.end)} · ${Math.round(c.out_duration||c.duration)}s${c.layout?` · ${c.layout}`:""}${c.jump_cuts?` · ${c.jump_cuts} cuts`:""}</span>
+      <span>${views?`<b>${num(views)}</b> <span class="status">views</span> · `:""}<span class="score">${c.score}</span></span></div>
+    ${c.final?`<div class="status" style="margin-bottom:4px"><span class="dot done"></span>Voiceover added</div>`:""}
+    <div class="field"><b>Hook on screen</b>${esc(c.hook)}<button class="small copy edit-hook">Edit</button></div>
+    <div class="field"><b>Post text</b><div style="white-space:pre-wrap">${esc(post)}</div><button class="small copy" data-copy="${esc(post)}">Copy</button></div>
+    <div class="field"><b>Your commentary script</b>${esc(c.commentary_script)}<button class="small copy" data-copy="${esc(c.commentary_script)}">Copy</button></div>
+    <details><summary>Why this moment</summary><div class="muted" style="font-size:13px;margin-top:6px">${esc(c.reason)}</div></details>
+    ${c.status==="ready" ? `
+    <div class="seg"><button class="small on" data-tab="rec">🎙 Record</button><button class="small" data-tab="up">Upload audio</button><button class="small" data-tab="post">↗ Post</button></div>
+    <div data-pane="rec">
+      <div class="prompter" hidden>${esc(c.commentary_script)}</div>
+      <div class="actions"><button class="rec small btn-rec">● Record over clip</button><span class="timer muted"></span></div>
+      <div class="faint" style="font-size:12px;margin-top:6px">The clip plays muted while you talk so your voice lines up.</div>
+    </div>
+    <div data-pane="up" hidden>
+      <input type="file" accept="audio/*,video/*" class="vo-file">
+      <div class="row"><div><label>Start at (sec)</label><input type="number" step="0.1" min="0" value="0" class="vo-off"></div>
+      <div><label>Original volume under voice</label><select class="vo-duck"><option value="0.95">Very low</option><option value="0.85" selected>Low</option><option value="0.6">Medium</option><option value="0.3">High</option></select></div></div>
+      <div class="actions"><button class="small primary vo-send">Mix voiceover</button></div>
+    </div>
+    <div data-pane="post" hidden>
+      ${cfg.posting_ready?`<div class="actions"><button class="small primary sch-next">Schedule next slot</button>
+        <input type="datetime-local" class="sch-when" style="flex:1;min-width:170px"><button class="small sch-at">At this time</button></div>`
+        :`<div class="faint" style="font-size:12px;margin-top:8px">Auto-posting is off (no Upload-Post key). Download, post it yourself, then paste the link:</div>`}
+      <div class="actions"><input type="url" class="man-url" placeholder="Paste a TikTok / Reels / Shorts link" style="flex:1;min-width:200px"><button class="small man-add">Track</button></div>
+    </div>
+    <div class="posts">${posts.map(p=>`
+      <div class="post"><span class="dot ${p.status}"></span><b>${esc(PLAT[p.platform]||p.platform)}</b>
+        <span class="status">${p.status==="queued"?when(p.scheduled_at):p.status==="posted"&&p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">open</a>`:esc(p.status)}${p.error?` <span class="err">${esc(p.error)}</span>`:""}</span>
+        <span class="r">${p.status==="posted"?`${num(p.views)} views`:""}
+          ${p.status==="posted"&&p.url?`<button class="small p-ref" data-id="${p.id}">↻</button>`:""}
+          ${p.status==="failed"?`<button class="small p-retry" data-id="${p.id}">Retry</button>`:""}
+          <button class="small p-del" data-id="${p.id}" title="${p.status==="posted"?"Stop tracking":"Cancel"}">✕</button></span></div>`).join("")}</div>
+    <div class="actions">
+      <a class="btn small primary" href="${media(job.id,src)}" download="${c.id}.mp4">⬇ Download${c.final?" final":""}</a>
+      ${c.final?`<a class="btn small" href="${media(job.id,c.file)}" download="${c.id}-raw.mp4">Without voice</a>`:""}
+      <button class="small rerender" title="Re-render with the channel's current settings">↻ Re-render</button>
+    </div>
+    <div class="err vo-err"></div>` : ""}
+  </div>`;
+}
+function wireClip(job, c){
+  const card = $("#c-"+c.id); if(!card) return;
+  const reload = () => { lastJobJson = ""; pageJob(job.id) };
+  $$("[data-copy]", card).forEach(b => b.onclick = () => copy(b.dataset.copy));
+  $(".edit-hook", card).onclick = async () => {
+    const t = prompt("On-screen hook text", c.hook); if(t===null) return;
+    toast("Re-rendering…"); const fd = new FormData(); fd.append("hook", t);
+    try{ await api(`/api/clips/${c.id}/hook`,{method:"POST",body:fd}); reload() }catch(e){ alert(e.message) }
+  };
+  if(c.status!=="ready") return;
+  const errEl = $(".vo-err", card);
+  $$("[data-tab]", card).forEach(b => b.onclick = () => {
+    $$("[data-tab]", card).forEach(x=>x.classList.toggle("on", x===b));
+    $$("[data-pane]", card).forEach(p=>p.hidden = p.dataset.pane!==b.dataset.tab);
+  });
+  $(".rerender", card).onclick = async () => { toast("Re-rendering with channel settings…");
+    try{ await api(`/api/clips/${c.id}/rerender`,{method:"POST"}); reload() }catch(e){ errEl.textContent = e.message } };
+  const send = async (blob, name, offset, duck) => {
+    errEl.textContent = ""; toast("Mixing voiceover…");
+    const fd = new FormData(); fd.append("file", blob, name); fd.append("offset", offset); fd.append("duck", duck);
+    try{ await api(`/api/clips/${c.id}/voiceover`,{method:"POST",body:fd}); toast("Voiceover added"); reload() }catch(e){ errEl.textContent = e.message }
+  };
+  $(".vo-send", card).onclick = () => { const f = $(".vo-file", card).files[0]; if(!f){ errEl.textContent="Choose an audio file"; return }
+    send(f, f.name, $(".vo-off", card).value||0, $(".vo-duck", card).value) };
+  // posting
+  const sched = async at => { try{ const r = await api(`/api/clips/${c.id}/schedule`,{method:"POST",json:at?{when:at}:{}});
+    toast(r.posts.length?`Scheduled for ${when(r.posts[0].scheduled_at)}`:"Already scheduled on all platforms"); reload() }catch(e){ errEl.textContent = e.message } };
+  $(".sch-next", card) && ($(".sch-next", card).onclick = () => sched(null));
+  $(".sch-at", card) && ($(".sch-at", card).onclick = () => { const v = $(".sch-when", card).value; if(!v){ errEl.textContent="Pick a date and time"; return } sched(v) });
+  $(".man-add", card).onclick = async () => { const url = $(".man-url", card).value.trim(); if(!url) return;
+    try{ await api(`/api/clips/${c.id}/posts`,{method:"POST",json:{url}}); toast("Tracking views"); setTimeout(reload, 2500) }catch(e){ errEl.textContent = e.message } };
+  $$(".p-del", card).forEach(b => b.onclick = async () => { if(confirm("Remove this post?")){ await api("/api/posts/"+b.dataset.id,{method:"DELETE"}); reload() } });
+  $$(".p-retry", card).forEach(b => b.onclick = async () => { await api(`/api/posts/${b.dataset.id}/retry`,{method:"POST"}); reload() });
+  $$(".p-ref", card).forEach(b => b.onclick = async () => { b.disabled = true;
+    try{ await api(`/api/posts/${b.dataset.id}/refresh`,{method:"POST"}); reload() }catch(e){ errEl.textContent = e.message; b.disabled = false } });
+  // record over the clip: plays muted from the start while recording the mic
+  const recBtn = $(".btn-rec", card), timer = $(".timer", card), prompter = $(".prompter", card);
+  let rec = null, chunks = [], tick = null;
+  recBtn.onclick = async () => {
+    if(rec){ rec.stop(); return }
+    if(!navigator.mediaDevices?.getUserMedia){ errEl.textContent = "Recording needs HTTPS (set DOMAIN in .env), or use Upload audio."; return }
+    let stream; try{ stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}) }
+    catch(e){ errEl.textContent = "Microphone blocked: "+e.message; return }
+    const mime = ["audio/webm;codecs=opus","audio/mp4","audio/webm"].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
+    rec = new MediaRecorder(stream, mime?{mimeType:mime}:undefined); chunks = [];
+    const vid = $("#v-"+c.id);
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onstop = () => {
+      stream.getTracks().forEach(t=>t.stop()); clearInterval(tick);
+      card.classList.remove("recording"); prompter.hidden = true; vid.pause(); vid.muted = false;
+      recBtn.textContent = "● Record over clip"; timer.textContent = "";
+      const type = rec.mimeType || "audio/webm", ext = type.includes("mp4") ? "m4a" : "webm";
+      const blob = new Blob(chunks, {type}); rec = null;
+      if(blob.size > 1000 && confirm("Use this take?")) send(blob, "voice."+ext, 0, 0.85);
+    };
+    card.classList.add("recording"); prompter.hidden = false; vid.currentTime = 0; vid.muted = true;
+    rec.start(250); vid.play().catch(()=>{});
+    const t0 = Date.now(), total = c.out_duration || c.duration; recBtn.textContent = "■ Stop";
+    tick = setInterval(() => { timer.textContent = fmtT((Date.now()-t0)/1000) + " / " + fmtT(total) }, 250);
+    vid.onended = () => { if(rec) rec.stop() };
+  };
+}
+
+/* ============================================================ posts queue */
+async function pageQueue(){
+  const v = $("#view");
+  const rows = await api("/api/queue");
+  const up = rows.filter(p=>["queued","posting"].includes(p.status)), done = rows.filter(p=>!["queued","posting"].includes(p.status));
+  const line = p => `<a class="item" href="#/job/${p.job_id}#${p.clip_id}">
+    ${p.thumb?`<img src="${media(p.job_id,p.thumb)}" loading="lazy">`:`<div class="ph"></div>`}
+    <div style="min-width:0"><div class="t">${esc(p.hook||p.title)}</div>
+      <div class="status"><span class="dot ${p.status}"></span>${esc(PLAT[p.platform]||p.platform)} · ${esc(p.channel)} · ${p.status==="queued"?when(p.scheduled_at):p.status==="posted"?when(p.posted_at):esc(p.status)}</div>
+      ${p.error?`<div class="err">${esc(p.error)}</div>`:""}</div>
+    <div class="r">${p.status==="posted"?`<b>${num(p.views)}</b><div class="status">views</div>`:""}</div></a>`;
+  v.innerHTML = `
+  <div class="row" style="align-items:center"><h1 style="margin:0">Posts</h1>
+    <button class="small" id="refresh" style="flex:none;min-width:0">↻ Refresh all views</button></div>
+  <h2 style="margin:18px 0 10px">Scheduled (${up.length})</h2>
+  ${up.length?`<div class="list">${up.map(line).join("")}</div>`:`<div class="card empty">Nothing scheduled.</div>`}
+  <h2 style="margin:22px 0 10px">Posted & tracked</h2>
+  ${done.length?`<div class="list">${done.map(line).join("")}</div>`:`<div class="card empty">No posts yet.</div>`}`;
+  $("#refresh").onclick = async () => { await api("/api/stats/refresh",{method:"POST"}); toast("Refreshing views in the background") };
+}
+
+/* ============================================================ router */
+async function route(){
+  clearTimeout(pollTimer); renderNav();
+  const h = location.hash || "#/";
+  const [path, qs] = h.slice(1).split("?"); const params = new URLSearchParams((qs||"").split("#")[0]);
+  const parts = path.split("#")[0].split("/").filter(Boolean);
+  const v = $("#view"); v.innerHTML = `<div class="status" style="padding:20px 0"><span class="dot run"></span>Loading…</div>`;
+  try{
+    if(!parts.length) await pageDashboard();
+    else if(parts[0]==="new") await pageNew();
+    else if(parts[0]==="channels") await pageChannels();
+    else if(parts[0]==="channel") await pageChannel(parts[1], params.get("tab"));
+    else if(parts[0]==="job") await pageJob(parts[1]);
+    else if(parts[0]==="queue") await pageQueue();
+    else await pageDashboard();
+  }catch(e){ v.innerHTML = `<div class="card err">${esc(e.message)}</div>` }
+}
+(async () => {
+  try{ cfg = await api("/api/config");
+    $("#sys").textContent = (cfg.claude_ready?"Claude ✓":"Claude key missing") + (cfg.posting_ready?" · posting ✓":"");
+  }catch{ $("#sys").textContent = "offline" }
+  window.addEventListener("hashchange", route); route();
+})();
+</script>
+</body>
+</html>
